@@ -209,7 +209,7 @@ function post(query,body_text) {
 }
 
 function keepAlive() {
-    let auth_data = JSON.parse(util.read_log('apnx-auth.log'));
+    let auth_data = JSON.parse(util.read_log('appnexus-auth.dat'));
     let retry = 0;
     return new Promise((resolve,reject) => {
         // Ensure access token is active.
@@ -222,12 +222,12 @@ function keepAlive() {
                 let last_run = (new Date(lock_data.last_run)).getTime();
                 if((last_run + 60000) < date_now) {
                     // If last auth happened 60 seconds ago, re-authenticate.
-                    util.append_log('apnx-reqs.log','Sessions has expired. Re-authenticating...');
+                    util.append_log('appnexus-requests.log','Sessions has expired. Re-authenticating...');
                     authenticate().then((auth_data)=>{
-                        util.append_log('apnx-reqs.log','Login success.');
+                        util.append_log('appnexus-requests.log','Login success.');
                         resolve(auth_data);
                     }).catch((error)=>{
-                        util.append_log('apnx-reqs.log',error);
+                        util.append_log('appnexus-requests.log',error);
                         reject(error);
                     });
                 } else {
@@ -245,7 +245,7 @@ function keepAlive() {
                         } else {
                             clearInterval(waiter);
                             let message = `Request timed out after ${retry_max} seconds.`;
-                            util.append_log('apnx-reqs.log',message);
+                            util.append_log('appnexus-requests.log',message);
                             reject(message);
                         }
                     },1000);
@@ -253,10 +253,10 @@ function keepAlive() {
             } else {
                 // Re-authenticate.
                 authenticate().then((auth_data)=>{
-                    util.append_log('apnx-reqs.log','Login success.');
+                    util.append_log('appnexus-requests.log','Login success.');
                     resolve(auth_data);
                 }).catch((error)=>{
-                    util.append_log('apnx-reqs.log',error);
+                    util.append_log('appnexus-requests.log',error);
                     reject(error);
                 });
             }
@@ -267,7 +267,7 @@ function keepAlive() {
 }
 
 function lockAuth(status) {
-    let lock_file = path.join(process.cwd(),'logs','apnx-auth.lock');
+    let lock_file = path.join(process.cwd(),'logs','appnexus-auth.lock');
     let data      = { last_run: (new Date((new Date()).toUTCString())).toISOString() };
 
     if(status === true) {
@@ -316,7 +316,7 @@ function authenticate() {
                                 token: api_res.response.token,
                                 expire_date: expire_date
                             }
-                            util.write_log('apnx-auth.log',JSON.stringify(auth_data));
+                            util.write_log('appnexus-auth.dat',JSON.stringify(auth_data));
                             resolve(auth_data);
                         }
                     }

@@ -23,7 +23,7 @@ function getAgencySpend(agency_id) {
                 }
                 let start_date  = `${timestamp.YYYY}-${timestamp.MM}-01`;
                 let ended_date  = `${timestamp.YYYY}-${timestamp.MM}-${(new Date(timestamp.YYYY, timestamp.MM, 0)).getDate()}`;
-                let auth_data   = JSON.parse(util.read_log('dsp-auth.log'));
+                let auth_data   = JSON.parse(util.read_log('platformio-auth.dat'));
                 request(
                     {
                         url: `${baseurl}/module/Cpmplatform/reportDruid/`,
@@ -52,14 +52,14 @@ function getAgencySpend(agency_id) {
                             };
                             resolve(final_result);
                         } catch(error) {
-                            util.append_log('dsp-reqs.log',error);
+                            util.append_log('platformio-requests.log',error);
                             reject(error);
                         }
                     }
                 );
             })
             .catch((error) => {
-                util.append_log('dsp-reqs.log',error);
+                util.append_log('platformio-requests.log',error);
                 reject(error);
             });
         }
@@ -67,7 +67,7 @@ function getAgencySpend(agency_id) {
 }
 
 function keepAlive() {
-    let auth_data = JSON.parse(util.read_log('dsp-auth.log'));
+    let auth_data = JSON.parse(util.read_log('platformio-auth.dat'));
     let retry = 0;
     return new Promise((resolve,reject) => {
         // Ensure access token is active.
@@ -79,9 +79,9 @@ function keepAlive() {
             if(lock_data.locked) { // If there is ongoing authentication request.
                 if((new Date(lock_data.last_run)).getTime() > (date_now + 60000)) {
                     // If last auth happened 1 minute ago, re-authenticate.
-                    util.append_log('dsp-reqs.log','Sessions has expired. Re-authenticating...');
+                    util.append_log('platformio-requests.log','Sessions has expired. Re-authenticating...');
                     authenticate().then((data)=>{
-                        util.append_log('dsp-reqs.log',data);
+                        util.append_log('platformio-requests.log',data);
                         resolve(data);
                     }).catch((error)=>{
                         reject(error);
@@ -101,16 +101,16 @@ function keepAlive() {
                         } else {
                             clearInterval(waiter);
                             let message = `Request timed out after ${retry_max} seconds.`;
-                            util.append_log('dsp-reqs.log',message);
+                            util.append_log('platformio-requests.log',message);
                             reject(message);
                         }
                     },1000);
                 }
             } else {
                 // Re-authenticate.
-                util.append_log('dsp-reqs.log','Sessions has expired. Re-authenticating...');
+                util.append_log('platformio-requests.log','Sessions has expired. Re-authenticating...');
                 authenticate().then((data)=>{
-                    util.append_log('dsp-reqs.log',data);
+                    util.append_log('platformio-requests.log',data);
                     resolve(data);
                 }).catch((error)=>{
                     reject(error);
@@ -123,7 +123,7 @@ function keepAlive() {
 }
 
 function lockAuth(status) {
-    let lock_file = path.join(process.cwd(),'logs','dsp-auth.lock');
+    let lock_file = path.join(process.cwd(),'logs','platformio-auth.lock');
     let data      = { last_run: (new Date((new Date()).toUTCString())).toISOString() };
 
     if(status === true) {
@@ -169,7 +169,7 @@ function authenticate() {
                         } else {
                             let date_now = new Date((new Date()).toUTCString());
                             api_res.expire_date = (new Date(date_now.setTime(date_now.getTime() + (api_res.expires_in * 1000)))).toISOString();
-                            util.write_log('dsp-auth.log',JSON.stringify(api_res));
+                            util.write_log('platformio-auth.dat',JSON.stringify(api_res));
                             resolve('DSP login success.');
                         }
                     }
