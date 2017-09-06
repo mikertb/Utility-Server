@@ -5,10 +5,30 @@ const util    = require(path.join(process.cwd(),'helpers','utility.js'));
 const request = require('request');
 const baseurl = 'https://api.appnexus.com';
 
-function getAgencySpend(agency_id) {
+function inArray(needle, haystack) {
+    var length = haystack.length;
+    for(var i = 0; i < length; i++) {
+        if(haystack[i] == needle) return true;
+    }
+    return false;
+}
+
+function getAgencySpend(agency_id,report_interval="month_to_date") {
     return new Promise((resolve,reject)=> {
+        let intervals = [
+            "month_to_yesterday",
+            "month_to_date",
+            "last_month",
+            "last_30_days",
+            "last_7_days",
+            "last_2_days",
+            "last_48_hours",
+            "today"
+        ];
         if(!agency_id) {
-            reject('Agency ID(s) is required.');
+            reject('Agency ID is required.');
+        } else if(!inArray(report_interval,intervals)) {
+            reject('Invalid report interval.');
         } else {
             getAdvertisers(agency_id)
             .then((advs_data) => {
@@ -18,7 +38,7 @@ function getAgencySpend(agency_id) {
                         "report_type":"network_analytics",
                         "columns": ["seller_member_name","seller_member_id","cost","imps"],
                         "filters": [{"advertiser_id": adv_ids}],
-                        "report_interval": "month_to_date",
+                        "report_interval": report_interval,
                         "format":"csv"
                     }
                 }
