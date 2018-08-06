@@ -64,6 +64,7 @@ function getAgencySpend(agency_id,report_interval="month_to_date") {
                                         "total": {"media_cost":0,"imps":0},
                                     }
                                     for(csv_ob of csv_obs) {
+                                        console.log(csv_ob);
                                         if(csv_ob.seller_member_id == 181) {
                                             spend_data.google.media_cost += Number(csv_ob.cost);
                                             spend_data.google.imps += Number(csv_ob.imps);
