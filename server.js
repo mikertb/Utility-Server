@@ -30,7 +30,7 @@ app.get('/platformio-report/agency-spend',(req,res)=>{
             })
             .catch((error)=>{
                 console.log(error);
-                error_res.message = error;
+                error_res.message = "Failed to get report.";
                 res.json(error_res);
             });
         } else {
@@ -48,26 +48,19 @@ app.get('/appnexus-report/agency-spend',(req,res)=>{
     }
     if(req.query.id) {
         if(/^[0-9]+$/.test(req.query.id)) {
-
-            let interval = "month_to_date";
-            if(req.query.interval) interval = req.query.interval;
-
-            appnexus.getAgencySpend(req.query.id,interval)
+            appnexus.getAgencySpend(req.query.id)
             .then((data) => {
                 try{
                     res.json(data);
                 } catch(error) {
-                    console.log(error);
-                    error_res.message = 'Internal server error.';
+                    error_res.message('Internal server error.');
                     res.json(error_res);
                 }
             })
             .catch((error)=>{
-                error_res.message = error;
                 res.json(error_res);
             });
         } else {
-            error_res.message = "Agency ID is invalid.";
             res.json(error_res);
         }
     } else {
