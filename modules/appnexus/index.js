@@ -79,6 +79,7 @@ function getAgencySpend(agency_id,report_interval="month_to_date") {
                                         spend_data.total.imps += Number(csv_ob.imps);
                                     }
                                     response.data = spend_data;
+                                    console.log(response.data);
                                     resolve(response);
                                 }
                             });
