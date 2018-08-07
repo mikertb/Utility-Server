@@ -63,20 +63,20 @@ function getAgencySpend(agency_id,report_interval="month_to_date") {
                                         "others": {"media_cost":1,"imps":1},
                                         "total": {"media_cost":1,"imps":1},
                                     }
-                                    // for(csv_ob of csv_obs) {
-                                    //     if(csv_ob.seller_member_id == 181) {
-                                    //         spend_data.google.media_cost += Number(csv_ob.cost);
-                                    //         spend_data.google.imps += Number(csv_ob.imps);
-                                    //     } else if(csv_ob.seller_member_id == 273) {
-                                    //         spend_data.yahoo.media_cost += Number(csv_ob.cost);
-                                    //         spend_data.yahoo.imps += Number(csv_ob.imps);
-                                    //     } else {
-                                    //         spend_data.others.media_cost += Number(csv_ob.cost);
-                                    //         spend_data.others.imps += Number(csv_ob.imps);
-                                    //     }
-                                    //     spend_data.total.media_cost += Number(csv_ob.cost);
-                                    //     spend_data.total.imps += Number(csv_ob.imps);
-                                    // }
+                                    for(csv_ob of csv_obs) {
+                                        if(csv_ob.seller_member_id == 181) {
+                                            spend_data.google.media_cost += Number(csv_ob.cost);
+                                            spend_data.google.imps += Number(csv_ob.imps);
+                                        } else if(csv_ob.seller_member_id == 273) {
+                                            spend_data.yahoo.media_cost += Number(csv_ob.cost);
+                                            spend_data.yahoo.imps += Number(csv_ob.imps);
+                                        } else {
+                                            spend_data.others.media_cost += Number(csv_ob.cost);
+                                            spend_data.others.imps += Number(csv_ob.imps);
+                                        }
+                                        spend_data.total.media_cost += Number(csv_ob.cost);
+                                        spend_data.total.imps += Number(csv_ob.imps);
+                                    }
                                     response.data = spend_data;
                                     resolve(response);
                                 }
