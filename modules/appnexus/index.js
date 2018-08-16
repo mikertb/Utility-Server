@@ -58,12 +58,14 @@ function getAgencySpend(agency_id,report_interval="month_to_date") {
                                     reject(error);
                                 } else {
                                     let spend_data = {
-                                        "google": {"media_cost":1,"imps":1},
-                                        "yahoo": {"media_cost":1,"imps":1},
-                                        "others": {"media_cost":1,"imps":1},
-                                        "total": {"media_cost":1,"imps":1},
+                                        "google": {"media_cost":0,"imps":0},
+                                        "yahoo": {"media_cost":0,"imps":0},
+                                        "others": {"media_cost":0,"imps":0},
+                                        "total": {"media_cost":0,"imps":0},
+	                                      "creative_overage_fees": 0,
                                     }
-                                    for(csv_ob of csv_obs) {
+	                                console.log(csv_obs);
+	                                for(csv_ob of csv_obs) {
                                         if(csv_ob.seller_member_id == 181) {
                                             spend_data.google.media_cost += Number(csv_ob.cost);
                                             spend_data.google.imps += Number(csv_ob.imps);
@@ -77,6 +79,54 @@ function getAgencySpend(agency_id,report_interval="month_to_date") {
                                         spend_data.total.media_cost += Number(csv_ob.cost);
                                         spend_data.total.imps += Number(csv_ob.imps);
                                     }
+
+
+
+
+
+
+	                                let request_body2 = {
+		                                "report": {
+			                                "report_type":"buyer_invoice_report",
+			                                "columns": ["creative_overage_fees"],
+			                                "filters": [{"advertiser_id": adv_ids}],
+			                                "report_interval": report_interval,
+			                                "format":"csv"
+		                                }
+	                                }
+	                                post('report',JSON.stringify(request_body2))
+			                                .then((report_data)=>{
+			                                	report_info = JSON.parse(report_data);
+				                                if(typeof report_info.response.report_id !== "undefined") {
+					                                getReport(report_info.response.report_id)
+							                                .then((csv_text)=>{
+								                                csvp(csv_text,{columns:true},(error,csv_obs)=>{
+									                                if(error) {
+										                                util.append_log('dsp-reqs.log',error);
+										                                reject(error);
+									                                } else {
+										                                spend_data.creative_overage_fees += Number(csv_obs.creative_overage_fees);
+									                                }
+								                                });
+							                                })
+							                                .catch((error) => {
+								                                console.log(error);
+								                                util.append_log('dsp-reqs.log',error);
+								                                reject(error);
+							                                });
+				                                }}).catch((error) => {
+		                                console.log(error);
+		                                util.append_log('dsp-reqs.log',error);
+		                                reject(error);
+	                                });
+
+
+
+
+
+
+
+
                                     response.data = spend_data;
                                     resolve(response);
                                 }
@@ -84,7 +134,7 @@ function getAgencySpend(agency_id,report_interval="month_to_date") {
                         })
                         .catch((error) => {
                             console.log(error);
-                            util.append_log('dsp-reqs.log',error); 
+                            util.append_log('dsp-reqs.log',error);
                             reject(error);
                         });
                     } else {
