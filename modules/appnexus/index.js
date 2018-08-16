@@ -163,7 +163,7 @@ function getAdvertisers(agency_id) {
         get(`user?id=${agency_id}`)
         .then((data)=>{
             let response_data = JSON.parse(data);
-            if(typeof response_data.response.user.advertiser_access !== "undefined") {
+            if(response_data.response.user.advertiser_access) {
                 resolve(response_data.response.user.advertiser_access);
             } else {
                 reject(response_data);
