@@ -63,6 +63,7 @@ function getAgencySpend(agency_id,report_interval="month_to_date") {
                                         "others": {"media_cost":0,"imps":0},
                                         "total": {"media_cost":0,"imps":0},
 	                                      "creative_overage_fees": 0,
+	                                      "total_audit_fee":0,
                                     }
 	                                console.log(csv_obs);
 	                                for(csv_ob of csv_obs) {
@@ -85,6 +86,7 @@ function getAgencySpend(agency_id,report_interval="month_to_date") {
 
 
 
+	                                //creative_overage_fees  in  buyer_invoice_report
 	                                let request_body2 = {
 		                                "report": {
 			                                "report_type":"buyer_invoice_report",
@@ -105,7 +107,9 @@ function getAgencySpend(agency_id,report_interval="month_to_date") {
 										                                util.append_log('dsp-reqs.log',error);
 										                                reject(error);
 									                                } else {
-										                                spend_data.creative_overage_fees += Number(csv_obs.creative_overage_fees);
+										                                for(csv_ob of csv_obs) {
+											                                spend_data.creative_overage_fees += Number(csv_ob.creative_overage_fees);
+										                                }
 									                                }
 								                                });
 							                                })
@@ -119,6 +123,55 @@ function getAgencySpend(agency_id,report_interval="month_to_date") {
 		                                util.append_log('dsp-reqs.log',error);
 		                                reject(error);
 	                                });
+
+
+
+
+
+
+
+
+
+
+																	//total_audit_fee  in  completed_creative_audits
+	                                let request_body3 = {
+		                                "report": {
+			                                "report_type":"completed_creative_audits",
+			                                "columns": ["total_audit_fee"],
+			                                "filters": [{"advertiser_id": adv_ids}],
+			                                "report_interval": report_interval,
+			                                "format":"csv"
+		                                }
+	                                }
+	                                post('report',JSON.stringify(request_body3))
+			                                .then((report_data)=>{
+				                                report_info = JSON.parse(report_data);
+				                                if(typeof report_info.response.report_id !== "undefined") {
+					                                getReport(report_info.response.report_id)
+							                                .then((csv_text)=>{
+								                                csvp(csv_text,{columns:true},(error,csv_obs)=>{
+									                                if(error) {
+										                                util.append_log('dsp-reqs.log',error);
+										                                reject(error);
+									                                } else {
+										                                for(csv_ob of csv_obs) {
+											                                spend_data.total_audit_fee += Number(csv_ob.total_audit_fee);
+										                                }
+									                                }
+								                                });
+							                                })
+							                                .catch((error) => {
+								                                console.log(error);
+								                                util.append_log('dsp-reqs.log',error);
+								                                reject(error);
+							                                });
+				                                }}).catch((error) => {
+		                                console.log(error);
+		                                util.append_log('dsp-reqs.log',error);
+		                                reject(error);
+	                                });
+
+
 
 
 
